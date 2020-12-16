@@ -9,6 +9,7 @@ time = example_hd_data$time
 J = example_hd_data$J
 I = example_hd_data$I
 visit = example_hd_data$visit
+rm(example_hd_data)
 
 testthat::test_that("works on full data", {
 

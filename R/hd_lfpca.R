@@ -179,12 +179,15 @@ hd_lfpca = function(Y,
   S = diag(svdy$d[1:J_projected])
 
   V = Y %*% U %*% solve(D)
+  rm(D)
   Ynew = t(V[, 1:J_projected]) %*% Y #D %*% t(U)
   rm(list = c("svdy"))
+  rm(Y)
+  S = S[1:N,]
 
 
-  Yvec = matrix(0, J_projected ^ 2, sum(visit ^ 2))
-  X = matrix(0, sum(visit ^ 2), 5)
+  Yvec = matrix(NA_real_, J_projected ^ 2, sum(visit ^ 2))
+  X = matrix(NA_real_, sum(visit ^ 2), 5)
   k = 0
   J_sq = 0
   for (j in 1:I) {
@@ -199,8 +202,8 @@ hd_lfpca = function(Y,
     if (timeadjust == TRUE) {
       Ti = (Ti - mean(Ti)) / sqrt(var(Ti))
     }
-    Yvec_i = matrix(0, J_projected * J_projected, Ji ^ 2)
-    X_i = matrix(0, Ji * Ji, 5)
+    Yvec_i = matrix(NA_real_, J_projected * J_projected, Ji ^ 2)
+    X_i = matrix(NA_real_, Ji * Ji, 5)
     Ytmp = Ynew[, (1:Ji) + k]
     for (j1 in 1:Ji) {
       for (j2 in 1:Ji) {
@@ -211,6 +214,7 @@ hd_lfpca = function(Y,
       }
     }
     Yvec[, (1:(visit[j] ^ 2)) + J_sq] = Yvec_i
+    rm(Yvec_i)
 
     X[(1:visit[j] ^ 2) + J_sq, ] = X_i
     J_sq = J_sq + Ji ^ 2
@@ -224,6 +228,7 @@ hd_lfpca = function(Y,
 
   #system.time(beta<- Yvec %*% X %*% chol2inv(chol(t(X)%*%X)))
   beta <- Yvec %*% X %*% solve(t(X) %*% X)
+  rm(Yvec)
   #sum((beta-beta2)^2)
   K00 = matrix(beta[, 1], J_projected, J_projected)
   K01 = matrix(beta[, 2], J_projected, J_projected)
@@ -401,7 +406,6 @@ hd_lfpca = function(Y,
                          sqrt(S[1:N, ]) %*% Ui %*% Ti)
     BYi_12 = as.vector(t(Au) %*% sqrt(S[1:N, ]) %*% Ui)
 
-
     BYi = c(BYi_11, BYi_12)
 
     #      system.time(wi<-chol2inv(chol(BBi))%*%BYi)
@@ -416,6 +420,7 @@ hd_lfpca = function(Y,
     k = k + Ji
 
   }
+  rm(S)
 
 
   if (verbose > 0) {
